@@ -17,6 +17,11 @@
 		"page": "html/background.html"
 	},
 
+	"browser_action": {
+		"default_icon": "SpeakSel19.png",
+		"default_title": "Speak Selection"
+	},
+
 	"options_page": "html/options.html",
 	
 	"minimum_chrome_version": "14",

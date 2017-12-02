@@ -24,10 +24,10 @@ function loadContentScriptInAllTabs() {
       for (var j = 0; j < tabs.length; j++) {
         chrome.tabs.executeScript(
             tabs[j].id,
-            {file: 'keycodes.js', allFrames: true});
+            {file: 'js/keycodes.js', allFrames: true});
         chrome.tabs.executeScript(
             tabs[j].id,
-            {file: 'content_script.js', allFrames: true});
+            {file: 'js/content_script.js', allFrames: true});
       }
     }
   });
