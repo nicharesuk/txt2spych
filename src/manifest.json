@@ -36,7 +36,8 @@
 				"js/keycodes.js",
 				"js/content_script.js",
 				"js/log.js"
-			]
+			],
+			"run_at" : "document_end"
 		}
 	]
 }
